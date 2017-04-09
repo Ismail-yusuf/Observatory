@@ -1,5 +1,7 @@
 package observatory
 
+import java.time.LocalDate
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -7,5 +9,39 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ExtractionTest extends FunSuite {
 
-  
+  test("Fahrenheits should be converted to Celsius correctly.") {
+    val cel0 = Extraction.fahrenheitToCelsius(32)
+    val cel1 = Extraction.fahrenheitToCelsius(33.8)
+    val cel2 = Extraction.fahrenheitToCelsius(35.6)
+    val cel50 = Extraction.fahrenheitToCelsius(122)
+    val cel100 = Extraction.fahrenheitToCelsius(212)
+
+    assert(cel0 === 0.0)
+    assert(cel1 === 1.0)
+    assert(cel2 === 2.0)
+    assert(cel50 === 50.0)
+    assert(cel100 === 100.0)
+  }
+
+  test("Locations and temperatures should be calculated correctly.") {
+    val actualResult = Extraction.locateTemperatures(2015, "/testStation.csv", "/testDate.csv").toSet
+    val expectedResult = Set(
+      (LocalDate.of(2015, 8, 11), Location(37.35, -78.433), 27.3),
+      (LocalDate.of(2015, 12, 6), Location(37.358, -78.438), 0.0),
+      (LocalDate.of(2015, 1, 29), Location(37.358, -78.438), 2.0)
+    )
+
+    assert(actualResult === expectedResult)
+  }
+
+  test("Location average temps should be calculated correctly.") {
+    val input = Extraction.locateTemperatures(2015, "/testStation.csv", "/testDate.csv")
+    val actualResult = Extraction.locationYearlyAverageRecords(input).toSet
+    val expectedResult = Set(
+      (Location(37.35, -78.433), 27.3),
+      (Location(37.358, -78.438), 1.0)
+    )
+
+    assert(actualResult === expectedResult)
+  }
 }
