@@ -7,6 +7,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.JavaConverters._
 import scala.io.Source
+import observatory.Helpers._
 
 /**
   * 1st milestone: data extraction
@@ -40,7 +41,7 @@ object Extraction {
     temperaturesList.flatMap { case (key, (date, temp)) => locationsMap.get(key).map((date, _, temp))}
   }
 
-  def fahrenheitToCelsius(fahrenheit: Double) = ((BigDecimal.valueOf(fahrenheit) - BigDecimal.valueOf(32)) / BigDecimal.valueOf(1.8)).toDouble
+  def fahrenheitToCelsius(fahrenheit: Double) = ((dec(fahrenheit) - dec(32)) / dec(1.8)).toDouble
 
   /**
     * @param records A sequence containing triplets (date, location, temperature)
