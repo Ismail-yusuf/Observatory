@@ -1,13 +1,8 @@
 package observatory
 
-import java.time.{LocalDate, Month}
-
-import org.apache.commons.io.IOUtils
-import org.apache.spark.{SparkConf, SparkContext}
-
-import scala.collection.JavaConverters._
-import scala.io.Source
+import java.time.LocalDate
 import observatory.Helpers._
+import scala.io.Source
 
 /**
   * 1st milestone: data extraction

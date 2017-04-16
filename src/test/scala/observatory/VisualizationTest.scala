@@ -1,51 +1,81 @@
 package observatory
 
 
+import observatory.Visualization._
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.Checkers
+import org.scalatest.{FunSuite, ShouldMatchers}
+import math._
 
 @RunWith(classOf[JUnitRunner])
-class VisualizationTest extends FunSuite with Checkers {
+class VisualizationTest extends FunSuite with Checkers with ShouldMatchers {
 
-  test("Distance should be calculated correctly.") {
-    val p1 = Location(2.0, 2.0)
-    val p2 = Location(-2.0, 5.0)
-    val p3 = Location(6.0, -1.0)
-    val p4 = Location(10.0, 8.0)
+  test("Temperature should be closer if location is closer to station.") {
+    val loc1 = Location(0,0)
+    val temp1 = 10d
+    val loc2 = Location(-100,-100)
+    val temp2 = 50d
+    val list = (loc1, temp1) :: (loc2, temp2) :: Nil
 
-    val dist1 = Visualization.distanceOfPoints(p1, p2)
-    val dist2 = Visualization.distanceOfPoints(p3, p1)
-    val dist3 = Visualization.distanceOfPoints(p1, p4)
-
-    assert(dist1 === 5.0)
-    assert(dist2 === 5.0)
-    assert(dist3 === 10.0)
+    val result1 = predictTemperature(list, Location(-40, -40))
+    val result2 = predictTemperature(list, Location(-60, -60))
+    assert(abs(temp1 - result1) < abs(temp2 - result1))
+    assert(abs(temp1 - result2) > abs(temp2 - result2))
   }
 
-  test("Weighed temp average should be calculated correctly") {
-    val distances = (5.0, 25.0) :: (5.0, 5.0) :: (10.0, 20.0) :: Nil
+  test("Color should be predicted correctly.") {
+    val col1 = Color(0, 0, 0)
+    val col2 = Color(33, 0, 107)
+    val col3 = Color(255, 0, 255)
+    val col4 = Color(0, 0, 255)
+    val col5 = Color(0, 255, 255)
+    val col6 = Color(255, 255, 0)
+    val col7 = Color(255, 0, 0)
+    val col8 = Color(255, 255, 255)
 
-    val result = Visualization.spatialInterpolateTemp(distances)
+    val tempColors = (-27d, col3) :: (-60d, col1) :: (60d, col8) :: (32d, col7) :: (0d, col5) :: (-50d, col2) :: (-15d, col4) :: (12d, col6) :: Nil
 
-    assert(result === 16.0)
+    val res1 = interpolateColor(tempColors, -100)
+    val res2 = interpolateColor(tempColors, 70)
+    val res3 = interpolateColor(tempColors, 32)
+    val res4 = interpolateColor(tempColors, 6)
+    val res5 = interpolateColor(tempColors, -23)
+    val res6 = interpolateColor(tempColors, 39)
+
+    assert(res1 === col1)
+    assert(res2 === col8)
+    assert(res3 === col7)
+    assert(res4 === Color(128, 255, 128))
+    assert(res5 === Color(170, 0, 255))
+    assert(res6 === Color(255, 64, 64))
   }
 
-  test("Temperature should be predicted correctly.") {
-    val loc1 = Location(-2.0, 5.0)
-    val loc2 = Location(6.0, -1.0)
-    val loc3 = Location(10.0, 8.0)
+  test("Color should be closer if temperature is closer") {
+    val col1 = Color(255, 0, 0)
+    val col2 = Color(0, 0, 255)
+    val tempColors = (0d, col1) :: (100d, col2) :: Nil
 
-    val locations = (loc1, 25.0) :: (loc2, 5.0) :: (loc3, 20.0) :: Nil
+    val result1 = interpolateColor(tempColors, 10)
+    val result2 = interpolateColor(tempColors, 90)
 
-    val locToCalculate1 = Location(2.0, 2.0)
-    val locToCalculate2 = Location(6.0, -1.0)
+    assert((col1 - result1).absolute < (col2 - result1).absolute)
+    assert((col1 - result2).absolute > (col2 - result2).absolute)
+  }
 
-    val res1 = Visualization.predictTemperature(locations, locToCalculate1)
-    val res2 = Visualization.predictTemperature(locations, locToCalculate2)
+  test("Color interpolation should work with only one color.") {
+    val col = Color(0, 0, 255)
+    val colorList = (0.0, col) :: Nil
 
-    assert(res1 === 16.0)
-    assert(res2 === 5.0)
+    assert(interpolateColor(colorList, -0.5) == col)
+    assert(interpolateColor(colorList, 0.5) == col)
+    assert(interpolateColor(colorList, 0.0) == col)
+  }
+
+  test("Visualize should return correctly sized image") {
+    val img = visualize((Location(0.0, 0.0), 0.0) :: Nil, (0.0, Color(0, 0, 0)) :: Nil)
+
+    assert(img.width === 360)
+    assert(img.height === 180)
   }
 }
