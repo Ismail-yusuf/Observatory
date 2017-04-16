@@ -1,11 +1,7 @@
 package observatory
 
-import java.time.{LocalDate, Month}
-
-import org.apache.commons.io.IOUtils
-import org.apache.spark.{SparkConf, SparkContext}
-
-import scala.collection.JavaConverters._
+import java.time.LocalDate
+import observatory.Helpers._
 import scala.io.Source
 
 /**
@@ -40,7 +36,7 @@ object Extraction {
     temperaturesList.flatMap { case (key, (date, temp)) => locationsMap.get(key).map((date, _, temp))}
   }
 
-  def fahrenheitToCelsius(fahrenheit: Double) = ((BigDecimal.valueOf(fahrenheit) - BigDecimal.valueOf(32)) / BigDecimal.valueOf(1.8)).toDouble
+  def fahrenheitToCelsius(fahrenheit: Double) = ((dec(fahrenheit) - dec(32)) / dec(1.8)).toDouble
 
   /**
     * @param records A sequence containing triplets (date, location, temperature)
